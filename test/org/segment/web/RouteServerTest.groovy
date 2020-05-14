@@ -1,12 +1,20 @@
 package org.segment.web
 
+import ch.qos.logback.classic.Level
+import ch.qos.logback.classic.LoggerContext
 import com.github.kevinsawicki.http.HttpRequest
 import org.apache.commons.io.IOUtils
 import org.eclipse.jetty.http.HttpStatus
 import org.segment.web.handler.ChainHandler
+import org.slf4j.LoggerFactory
 import spock.lang.Specification
 
 class RouteServerTest extends Specification {
+    void setup() {
+        LoggerContext log = LoggerFactory.getILoggerFactory();
+        log.getLogger('org.eclipse.jetty').level = Level.INFO
+    }
+
     def 'server'() {
         given:
         def handler = ChainHandler.instance

@@ -89,11 +89,8 @@ class ChainHandler implements Handler {
 
     private String uriPre
 
-    private String uriPreLastSaved
-
     ChainHandler uriPre(String uriPre) {
         this.uriPre = uriPre
-        this.uriPreLastSaved = uriPre
         this
     }
 
@@ -104,16 +101,14 @@ class ChainHandler implements Handler {
         uriPre + uri
     }
 
-    void group(String uriPre, Closure closure) {
-        if (uriPreLastSaved) {
-            uriPreLastSaved += uriPre
+    void group(String groupUri, Closure closure) {
+        if (uriPre) {
+            uriPre += groupUri
         } else {
-            uriPreLastSaved = uriPre
+            uriPre = groupUri
         }
-        this.uriPre = uriPreLastSaved
         closure.call()
-        this.uriPre = uriPreLastSaved[0..-(uriPre.length() + 1)]
-        this.uriPreLastSaved = this.uriPre
+        uriPre = uriPre[0..-(groupUri.length() + 1)]
     }
 
     private ChainHandler add(String uri, HttpMethod method, AbstractHandler handler,

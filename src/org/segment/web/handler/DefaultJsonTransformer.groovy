@@ -9,4 +9,9 @@ class DefaultJsonTransformer implements JsonTransformer {
     String json(Object obj) {
         new ObjectMapper().writeValueAsString(obj)
     }
+
+    @Override
+    <T> T read(byte[] bytes, Class<T> clz) {
+        new ObjectMapper().readValue(bytes, clz)
+    }
 }

@@ -1,8 +1,13 @@
 package org.segment.web.handler
 
 import groovy.transform.CompileStatic
+import org.apache.commons.io.IOUtils
+import org.eclipse.jetty.http.HttpHeader
 
+import javax.servlet.MultipartConfigElement
 import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.Part
+import java.nio.charset.StandardCharsets
 
 @CompileStatic
 class Req {
@@ -10,5 +15,112 @@ class Req {
 
     Req(HttpServletRequest request) {
         this.request = request
+    }
+
+    static String tmpDir = '~/tmp'
+
+    HttpServletRequest raw() {
+        request
+    }
+
+    String host() {
+        request.getHeader(HttpHeader.HOST.toString())
+    }
+
+    String userAgent() {
+        request.getHeader(HttpHeader.USER_AGENT.toString())
+    }
+
+    String contentType() {
+        request.getHeader(HttpHeader.CONTENT_TYPE.toString())
+    }
+
+    String header(String name) {
+        request.getHeader(name)
+    }
+
+    Object attr(String name, Object value = null) {
+        if (value == null) {
+            return request.getAttribute(name)
+        }
+        request.setAttribute(name, value)
+        value
+    }
+
+    int contentLength() {
+        String x = request.getHeader(HttpHeader.CONTENT_LENGTH.toString())
+        if (x) {
+            return x as int
+        }
+        def b = bodyAsBytes()
+        b ? b.size() : 0
+    }
+
+    private byte[] bytes
+
+    byte[] bodyAsBytes() {
+        if (bytes == null) {
+            def os = new ByteArrayOutputStream()
+            IOUtils.copy(request.inputStream, os)
+            bytes = os.toByteArray()
+        }
+        bytes
+    }
+
+    static final String encoding = StandardCharsets.UTF_8.name()
+
+    private String body
+
+    String body() {
+        if (body == null) {
+            body = new String(bodyAsBytes(), encoding)
+        }
+        body
+    }
+
+    public <T> T bodyAs(Class<T> clz) {
+        JsonReader.instance.read(bodyAsBytes(), clz)
+    }
+
+    String param(String name) {
+        request.getParameter(name)
+    }
+
+    Part part(String name) {
+        attr('org.eclipse.jetty.multipartConfig', new MultipartConfigElement(tmpDir))
+        request.getPart(name)
+    }
+
+    String form(String name) {
+        def part = part(name)
+        if (part == null) {
+            return null
+        }
+
+        def os = new ByteArrayOutputStream()
+        IOUtils.copy(part.inputStream, os)
+        new String(os.toByteArray(), encoding)
+    }
+
+    String ip() {
+        request.remoteAddr
+    }
+
+    String method() {
+        request.method
+    }
+
+    String uri() {
+        request.requestURI
+    }
+
+    String url() {
+        String x = request.requestURI
+        String query = request.queryString
+        query ? x + '?' + query : x
+    }
+
+    String protocol() {
+        request.protocol
     }
 }

@@ -2,8 +2,10 @@ package org.segment.web.handler
 
 import groovy.transform.CompileStatic
 import org.apache.commons.io.IOUtils
+import org.eclipse.jetty.http.HttpHeader
 import org.eclipse.jetty.http.HttpStatus
 
+import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletResponse
 import java.nio.charset.StandardCharsets
 import java.util.zip.GZIPOutputStream
@@ -18,13 +20,15 @@ class Resp {
         this.response = response
     }
 
+    HttpServletResponse raw() {
+        response
+    }
+
     private boolean isEnd = false
 
     boolean isEnd() {
         isEnd
     }
-
-    boolean isGzip
 
     static final String encoding = StandardCharsets.UTF_8.name()
 
@@ -60,5 +64,61 @@ class Resp {
     void halt(int status = HttpStatus.INTERNAL_SERVER_ERROR_500, String message =
             HttpStatus.Code.INTERNAL_SERVER_ERROR.message, Throwable t = null) {
         throw t == null ? new HaltEx(status, message) : new HaltEx(status, message, t)
+    }
+
+    private boolean isGzip = false
+
+    Resp gzip() {
+        this.isGzip = true
+        this
+    }
+
+    private int status = HttpStatus.OK_200
+
+    int status() {
+        status
+    }
+
+    Resp status(int s) {
+        this.status = s
+        response.status = s
+        this
+    }
+
+    private String contentType
+
+    String contentType() {
+        contentType
+    }
+
+    Resp contentType(String s) {
+        this.contentType = s
+        header(HttpHeader.CONTENT_TYPE.toString(), s)
+    }
+
+    Resp header(String name, String value) {
+        response.setHeader(name, value)
+        this
+    }
+
+    Resp cookie(String name, String value, int maxAge = 3600, String path = '/', String domain = null,
+                boolean secure = false, boolean httpOnly = false) {
+        Cookie c = new Cookie(name, value)
+        c.maxAge = maxAge
+        c.path = path
+        c.domain = domain ?: req.host()
+        c.secure = secure
+        c.httpOnly = httpOnly
+        response.addCookie(c)
+        this
+    }
+
+    Resp removeCookie(String name, String path = '/') {
+        cookie(name, '', 0, path)
+    }
+
+    void redirect(String location, int s = HttpStatus.FOUND_302) {
+        status(s)
+        response.sendRedirect(location)
     }
 }

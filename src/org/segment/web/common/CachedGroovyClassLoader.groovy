@@ -6,6 +6,8 @@ import org.apache.commons.codec.digest.DigestUtils
 import org.codehaus.groovy.control.CompilationFailedException
 import org.codehaus.groovy.control.CompilerConfiguration
 
+import java.nio.charset.StandardCharsets
+
 @CompileStatic
 @Slf4j
 @Singleton
@@ -17,7 +19,7 @@ class CachedGroovyClassLoader {
     }
 
     final static String GROOVY_FILE_EXT = '.groovy'
-    final static String GROOVY_FILE_ENCODING = 'utf-8'
+    final static String GROOVY_FILE_ENCODING = StandardCharsets.UTF_8.name()
 
     void init(ClassLoader parentClassLoader = null, String classpath = null) {
         if (gcl != null) {
