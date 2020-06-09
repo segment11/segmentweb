@@ -122,9 +122,9 @@ class RouteRefreshLoader {
     }
 
     void start() {
-        def now = new Date()
-        int sec = now.seconds
-        int nextSecDelay = 10 - (sec % 10)
+//        def now = new Date()
+//        int sec = now.seconds
+//        int nextSecDelay = 10 - (sec % 10)
 
         sh.scheduleWithFixedDelay({
             try {
@@ -132,7 +132,7 @@ class RouteRefreshLoader {
             } catch (Exception e) {
                 log.error('fail route refresh', e)
             }
-        }, nextSecDelay * 1000, 1000 * 10, java.util.concurrent.TimeUnit.MILLISECONDS)
+        }, 0, 1000 * 10, java.util.concurrent.TimeUnit.MILLISECONDS)
         log.info 'start route refresh loader interval'
     }
 }

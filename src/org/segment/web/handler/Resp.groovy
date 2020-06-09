@@ -120,5 +120,6 @@ class Resp {
     void redirect(String location, int s = HttpStatus.FOUND_302) {
         status(s)
         response.sendRedirect(location)
+        isEnd = true
     }
 }

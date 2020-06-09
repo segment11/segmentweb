@@ -3,6 +3,7 @@ package org.segment.web.handler
 import groovy.transform.CompileStatic
 import org.eclipse.jetty.http.HttpMethod
 
+import javax.servlet.http.HttpServletRequest
 import java.util.regex.Pattern
 
 @CompileStatic
@@ -12,7 +13,7 @@ abstract class RegexMatchHandler extends AbstractHandler {
     String uriPre
 
     @Override
-    protected boolean isRequestMatch(String method, String uriInput) {
+    protected boolean isRequestMatch(String method, String uriInput, HttpServletRequest request) {
         if (this.method != HttpMethod.OPTIONS && this.method.name() != method) {
             return false
         }
@@ -25,6 +26,6 @@ abstract class RegexMatchHandler extends AbstractHandler {
 
     @Override
     String name() {
-        method.name() + ':' + (uriPre ?: '') + pattern.toString()
+        'regex:' + method.name() + ':' + (uriPre ?: '') + pattern.toString()
     }
 }

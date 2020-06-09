@@ -39,6 +39,18 @@ class Req {
         request.getHeader(name)
     }
 
+    Object session(String name, Object value = null) {
+        if (value == null) {
+            return request.session.getAttribute(name)
+        }
+        request.session.setAttribute(name, value)
+        value
+    }
+
+    void removeSession(String name) {
+        request.session.removeAttribute(name)
+    }
+
     Object attr(String name, Object value = null) {
         if (value == null) {
             return request.getAttribute(name)
@@ -78,11 +90,14 @@ class Req {
         body
     }
 
-    public <T> T bodyAs(Class<T> clz) {
+    public <T> T bodyAs(Class<T> clz = HashMap) {
         JsonReader.instance.read(bodyAsBytes(), clz)
     }
 
     String param(String name) {
+        if (name.startsWith(':')) {
+            return request.getAttribute(name)
+        }
         request.getParameter(name)
     }
 

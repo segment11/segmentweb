@@ -20,7 +20,7 @@ abstract class AbstractHandler implements Handler {
     @Override
     boolean handle(HttpServletRequest request, HttpServletResponse response) {
         String uriInput = request.requestURI
-        if (!isRequestMatch(request.method, uriInput)) {
+        if (!isRequestMatch(request.method, uriInput, request)) {
             return false
         }
 
@@ -34,8 +34,8 @@ abstract class AbstractHandler implements Handler {
         true
     }
 
-    protected boolean isRequestMatch(String method, String uriInput) {
-        (this.method == HttpMethod.OPTIONS || this.method.name() == method) && isUriMatch(uri, uriInput)
+    protected boolean isRequestMatch(String method, String uriInput, HttpServletRequest request) {
+        (this.method == HttpMethod.OPTIONS || this.method.name() == method) && isUriMatch(uri, uriInput, request)
     }
 
     abstract Object hi(Req req, Resp resp)
@@ -60,21 +60,16 @@ abstract class AbstractHandler implements Handler {
             }
             return true
         } else {
-            int c = 0
-
             for (int i = 0; i < arr.length; i++) {
                 def s = arr[i]
                 if (s == '*' || s == '**') {
                     continue
                 }
                 if (s.startsWith(':')) {
-                    String key = s[1..-1]
                     String value = arr2[i]
                     if (request != null) {
-                        request.setAttribute(key, value)
-                        request.setAttribute('p' + c, value)
+                        request.setAttribute(s, value)
                     }
-                    c++
                     continue
                 }
                 if (s != arr2[i]) {

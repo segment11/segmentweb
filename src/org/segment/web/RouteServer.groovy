@@ -2,9 +2,14 @@ package org.segment.web
 
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
+import org.eclipse.jetty.server.Handler
 import org.eclipse.jetty.server.Request
 import org.eclipse.jetty.server.Server
-import org.eclipse.jetty.server.handler.AbstractHandler
+import org.eclipse.jetty.server.ServerConnector
+import org.eclipse.jetty.server.handler.HandlerList
+import org.eclipse.jetty.server.handler.ResourceHandler
+import org.eclipse.jetty.servlet.ServletContextHandler
+import org.eclipse.jetty.util.thread.QueuedThreadPool
 import org.segment.web.handler.ChainHandler
 
 import javax.servlet.ServletException
@@ -22,18 +27,47 @@ class RouteServer {
 
     JettyServerCreator serverCreator
 
-    void start(int port = 5000) {
+    String webRoot
+
+    int maxThreads = 200
+
+    int minThreads = 8
+
+    int idleTimeout = 60 * 1000
+
+    void start(int port = 5000, String host = '0.0.0.0') {
         if (loader) {
             loader.start()
         }
 
-        server = serverCreator ? serverCreator.create() : new Server(port)
-        server.handler = new AbstractHandler() {
+        server = serverCreator ? serverCreator.create() :
+                new Server(new QueuedThreadPool(maxThreads, minThreads, idleTimeout))
+        def handler = new ServletContextHandler(ServletContextHandler.SESSIONS) {
             @Override
-            void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
+            void doHandle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
                     throws IOException, ServletException {
                 ChainHandler.instance.handle(request, response)
             }
+        }
+
+        def connector = new ServerConnector(server)
+        connector.host = host
+        connector.port = port
+        server.addConnector(connector)
+
+        if (webRoot) {
+            def h = new ResourceHandler()
+            h.directoriesListed = true
+            String[] welcomeFiles = ['index.html', 'index.htm']
+            h.welcomeFiles = welcomeFiles
+            h.resourceBase = webRoot
+
+            def list = new HandlerList()
+            Handler[] handlers = [h, handler]
+            list.handlers = handlers
+            server.handler = list
+        } else {
+            server.handler = handler
         }
 
         Thread.start {

@@ -30,6 +30,8 @@ class ChainHandler implements Handler {
                 } catch (Exception e2) {
                     log.error('exception handle error', e2)
                 }
+            } else {
+                throw t
             }
         } finally {
             try {
@@ -174,11 +176,23 @@ class ChainHandler implements Handler {
         add(uri, HttpMethod.OPTIONS, handler, beforeList)
     }
 
+    ChainHandler before(Pattern pattern, RegexMatchHandler handler) {
+        addRegex(pattern, HttpMethod.OPTIONS, handler, beforeList)
+    }
+
     ChainHandler after(String uri, AbstractHandler handler) {
         add(uri, HttpMethod.OPTIONS, handler, afterList)
     }
 
+    ChainHandler after(Pattern pattern, RegexMatchHandler handler) {
+        addRegex(pattern, HttpMethod.OPTIONS, handler, afterList)
+    }
+
     ChainHandler afterAfter(String uri, AbstractHandler handler) {
         add(uri, HttpMethod.OPTIONS, handler, afterAfterList)
+    }
+
+    ChainHandler afterAfter(Pattern pattern, RegexMatchHandler handler) {
+        addRegex(pattern, HttpMethod.OPTIONS, handler, afterAfterList)
     }
 }
