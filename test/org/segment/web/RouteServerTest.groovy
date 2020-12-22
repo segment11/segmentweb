@@ -72,6 +72,7 @@ class RouteServerTest extends Specification {
         }
         def server = RouteServer.instance
         server.start()
+        Thread.sleep(1000)
         expect:
         HttpRequest.get('http://localhost:5000/context/a/b/c').body() == 'get c'
         HttpRequest.post('http://localhost:5000/context/a/b/c').body() == 'post c'
@@ -82,6 +83,9 @@ class RouteServerTest extends Specification {
         HttpRequest.get('http://localhost:5000/context/a/test/halt').body() == HttpStatus.Code.INTERNAL_SERVER_ERROR.message
         HttpRequest.get('http://localhost:5000/context/a/test/exception').body() == 'xxx'
         HttpRequest.get('http://localhost:5000/context/a/regex/book1').body() == 'get book'
+        def body = HttpRequest.get('http://localhost:7000/metrics').body()
+        println body
+        body.contains('HELP')
         cleanup:
         server.stop()
     }
