@@ -24,7 +24,7 @@ class RouteServerTest extends Specification {
     def 'server'() {
         given:
         def handler = ChainHandler.instance
-        handler.uriPre('/context').exceptionHandler { req, resp, t ->
+        handler.context('/context').exceptionHandler { req, resp, t ->
             resp.status = 500
             def os = resp.outputStream
             IOUtils.write(t.message ?: 'error', os)

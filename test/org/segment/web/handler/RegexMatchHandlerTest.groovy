@@ -11,9 +11,9 @@ class RegexMatchHandlerTest extends Specification {
                 return null
             }
         }
-        handler.uriPre = '/a'
+        handler.context = '/a'
         handler.pattern = ~/^\/b\/.+$/
         expect:
-        handler.isRequestMatch('GET', '/a/b/c')
+        handler.isRequestMatch('GET', '/a/b/c', null)
     }
 }

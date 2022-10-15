@@ -89,28 +89,28 @@ class ChainHandler implements Handler {
         }
     }
 
-    private String uriPre
+    private String context
 
-    ChainHandler uriPre(String uriPre) {
-        this.uriPre = uriPre
+    ChainHandler context(String context) {
+        this.context = context
         this
     }
 
     private String addUriPre(String uri) {
-        if (uriPre == null) {
+        if (context == null) {
             return uri
         }
-        uriPre + uri
+        context + uri
     }
 
     void group(String groupUri, Closure closure) {
-        if (uriPre) {
-            uriPre += groupUri
+        if (context) {
+            context += groupUri
         } else {
-            uriPre = groupUri
+            context = groupUri
         }
         closure.call()
-        uriPre = uriPre[0..-(groupUri.length() + 1)]
+        context = context[0..-(groupUri.length() + 1)]
     }
 
     private ChainHandler add(String uri, HttpMethod method, AbstractHandler handler,
@@ -124,7 +124,7 @@ class ChainHandler implements Handler {
 
     private ChainHandler addRegex(Pattern pattern, HttpMethod method, RegexMatchHandler handler,
                                   CopyOnWriteArrayList<Handler> ll) {
-        handler.uriPre = uriPre
+        handler.context = context
         handler.pattern = pattern
         handler.method = method
         removeOneThatExists(handler, ll)

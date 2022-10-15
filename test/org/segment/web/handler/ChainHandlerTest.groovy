@@ -4,10 +4,10 @@ import spock.lang.Specification
 
 class ChainHandlerTest extends Specification {
 
-    def 'uri pre group'() {
+    def 'context group'() {
         given:
         def handler = ChainHandler.instance
-        handler.uriPre('/context')
+        handler.context('/context')
         handler.group('/a') {
             handler.group('/b') {
                 handler.get('/c') { req, resp ->
