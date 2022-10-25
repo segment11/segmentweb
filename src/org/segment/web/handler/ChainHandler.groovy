@@ -3,6 +3,7 @@ package org.segment.web.handler
 import groovy.util.logging.Slf4j
 import org.apache.commons.io.IOUtils
 import org.eclipse.jetty.http.HttpMethod
+import org.eclipse.jetty.http.HttpStatus
 
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
@@ -18,6 +19,12 @@ class ChainHandler implements Handler {
             handleList(request, response, beforeList, false)
             def r = handleList(request, response, list, true)
             handleList(request, response, afterList, false)
+            if (!r) {
+                response.status = HttpStatus.NOT_FOUND_404
+                def os = response.outputStream
+                IOUtils.write(HttpStatus.Code.NOT_FOUND.message.getBytes(Resp.encoding), os)
+                os.close()
+            }
         } catch (HaltEx haltEx) {
             response.status = haltEx.status
             def os = response.outputStream
@@ -103,7 +110,7 @@ class ChainHandler implements Handler {
         context + uri
     }
 
-    void group(String groupUri, Closure closure) {
+    synchronized void group(String groupUri, Closure closure) {
         if (context) {
             context += groupUri
         } else {
@@ -113,8 +120,8 @@ class ChainHandler implements Handler {
         context = context[0..-(groupUri.length() + 1)]
     }
 
-    private ChainHandler add(String uri, HttpMethod method, AbstractHandler handler,
-                             CopyOnWriteArrayList<Handler> ll) {
+    private synchronized ChainHandler add(String uri, HttpMethod method, AbstractHandler handler,
+                                          CopyOnWriteArrayList<Handler> ll) {
         handler.uri = addUriPre(uri)
         handler.method = method
         removeOneThatExists(handler, ll)
