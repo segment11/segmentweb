@@ -98,39 +98,43 @@ class ChainHandler implements Handler {
 
     private String context
 
-    ChainHandler context(String context) {
+    synchronized ChainHandler context(String context) {
         this.context = context
         this
     }
 
-    private String addUriPre(String uri) {
+    private String addContextPath(String uri) {
         if (context == null) {
             return uri
         }
         context + uri
     }
 
-    synchronized void group(String groupUri, Closure closure) {
+    synchronized void group(String groupPathPrefix, Closure closure) {
         if (context) {
-            context += groupUri
+            context += groupPathPrefix
         } else {
-            context = groupUri
+            context = groupPathPrefix
         }
         closure.call()
-        context = context[0..-(groupUri.length() + 1)]
+        if (groupPathPrefix.length() >= context.size()) {
+            context = null
+        } else {
+            context = context[0..-(groupPathPrefix.length() + 1)]
+        }
     }
 
     private synchronized ChainHandler add(String uri, HttpMethod method, AbstractHandler handler,
                                           CopyOnWriteArrayList<Handler> ll) {
-        handler.uri = addUriPre(uri)
+        handler.uri = addContextPath(uri)
         handler.method = method
         removeOneThatExists(handler, ll)
         ll << handler
         this
     }
 
-    private ChainHandler addRegex(Pattern pattern, HttpMethod method, RegexMatchHandler handler,
-                                  CopyOnWriteArrayList<Handler> ll) {
+    private synchronized ChainHandler addRegex(Pattern pattern, HttpMethod method, RegexMatchHandler handler,
+                                               CopyOnWriteArrayList<Handler> ll) {
         handler.context = context
         handler.pattern = pattern
         handler.method = method
