@@ -96,6 +96,10 @@ class ChainHandler implements Handler {
         }
     }
 
+    AbstractHandler findByName(String name) {
+        list.find { it.name() == name }
+    }
+
     private String context
 
     synchronized ChainHandler context(String context) {
