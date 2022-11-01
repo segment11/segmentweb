@@ -19,7 +19,8 @@ class RouteRefreshLoader {
         r
     }
 
-    private ScheduledThreadPoolExecutor sh = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory('Route-Refresh'))
+    private ScheduledThreadPoolExecutor sh = new ScheduledThreadPoolExecutor(1,
+            new NamedThreadFactory('Route-Refresh'))
 
     private List<String> dirList = []
 
@@ -28,6 +29,13 @@ class RouteRefreshLoader {
     private Map<String, Object> variables = [:]
 
     private GroovyClassLoader gcl
+
+    private boolean isJarLoad = false
+
+    RouteRefreshLoader jarLoad(boolean flag) {
+        this.isJarLoad = flag
+        this
+    }
 
     RouteRefreshLoader addVariable(String key, Object value) {
         variables[key] = value
@@ -61,9 +69,54 @@ class RouteRefreshLoader {
         new GroovyShell(gcl, b, config)
     }
 
+    private void loadAndRun(String packageNameDir) {
+        def dirs = this.getClass().classLoader.getResources(packageNameDir)
+        for (url in dirs) {
+            if ('jar' == url.protocol) {
+                def jarFile = ((JarURLConnection) url.openConnection()).jarFile
+                for (entry in jarFile.entries()) {
+                    if (entry.isDirectory()) {
+                        continue
+                    } else {
+                        String name = entry.name
+                        runGroovyScriptInJar(name, packageNameDir)
+                    }
+                }
+            }
+        }
+    }
+
+    private void runGroovyScriptInJar(String name, String packageNameDir) {
+        if (name[0] == '/') {
+            name = name[1..-1]
+        }
+
+        if (name.startsWith(packageNameDir) && name.endsWith('.class') && !name.contains('$') && !name.contains('_')) {
+            String className = name[0..-7].replaceAll(/\//, '.')
+            def one = Class.forName(className).newInstance()
+            if (one instanceof Script) {
+                Script gs = one as Script
+                def b = new Binding()
+                variables.each { k, v ->
+                    b.setProperty(k, v)
+                }
+                gs.setBinding(b)
+                gs.run()
+                log.info('run script {}', name)
+            }
+        }
+    }
+
     void refresh() {
         def shell = getShell()
         for (dir in dirList) {
+            if (isJarLoad) {
+                def index = dir.indexOf('/src/')
+                def packageNameDir = dir[index + 5..-1]
+                loadAndRun(packageNameDir)
+                continue
+            }
+
             def d = new File(dir)
             if (!d.exists() || !d.isDirectory()) {
                 continue
@@ -117,15 +170,20 @@ class RouteRefreshLoader {
     }
 
     void stop() {
-        sh.shutdown()
-        log.info 'stop route refresh loader interval'
+        if (sh) {
+            sh.shutdown()
+            log.info 'stop route refresh loader interval'
+            sh = null
+        }
     }
 
     void start() {
-//        def now = new Date()
-//        int sec = now.seconds
-//        int nextSecDelay = 10 - (sec % 10)
+        if (isJarLoad) {
+            refresh()
+            return
+        }
 
+        sh = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory('Route-Refresh'))
         sh.scheduleWithFixedDelay({
             try {
                 refresh()
