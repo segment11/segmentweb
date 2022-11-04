@@ -102,14 +102,14 @@ class RouteServer {
 
         Thread.start {
             server.start()
-            log.info('jetty server started - ' + port)
+            log.info('jetty server started - {}', port)
             server.join()
         }
 
         if (metricServer) {
             Thread.start {
                 metricServer.start()
-                log.info('metric server started - ' + metricPort)
+                log.info('metric server started - {}', metricPort)
                 metricServer.join()
             }
         }

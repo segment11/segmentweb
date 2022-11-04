@@ -149,11 +149,11 @@ class RouteRefreshLoader {
         }
 
         def name = file.name
-        log.info 'begin refresh ' + name
+        log.info 'begin refresh {}', name
         try {
             shell.evaluate(file)
             lastModified[file.absolutePath] = file.lastModified()
-            log.info 'done refresh ' + name
+            log.info 'done refresh {}', name
             if (refreshFileCallback != null) {
                 refreshFileCallback.call(file)
             }
