@@ -1,7 +1,6 @@
 package org.segment.web.handler
 
 import groovy.transform.CompileStatic
-import org.apache.commons.io.IOUtils
 import org.eclipse.jetty.http.HttpHeader
 
 import javax.servlet.MultipartConfigElement
@@ -73,7 +72,7 @@ class Req {
     byte[] bodyAsBytes() {
         if (bytes == null) {
             def os = new ByteArrayOutputStream()
-            IOUtils.copy(request.inputStream, os)
+            Resp.copy(request.inputStream, os)
             bytes = os.toByteArray()
         }
         bytes
@@ -113,7 +112,7 @@ class Req {
         }
 
         def os = new ByteArrayOutputStream()
-        IOUtils.copy(part.inputStream, os)
+        Resp.copy(part.inputStream, os)
         new String(os.toByteArray(), encoding)
     }
 

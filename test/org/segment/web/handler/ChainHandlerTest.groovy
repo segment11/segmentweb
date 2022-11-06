@@ -7,6 +7,7 @@ class ChainHandlerTest extends Specification {
     def 'context group'() {
         given:
         def handler = ChainHandler.instance
+        handler.list.clear()
         handler.context('/context')
         handler.group('/a') {
             handler.group('/b') {

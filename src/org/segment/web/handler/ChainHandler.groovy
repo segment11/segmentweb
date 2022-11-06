@@ -1,7 +1,6 @@
 package org.segment.web.handler
 
 import groovy.util.logging.Slf4j
-import org.apache.commons.io.IOUtils
 import org.eclipse.jetty.http.HttpMethod
 import org.eclipse.jetty.http.HttpStatus
 
@@ -22,13 +21,13 @@ class ChainHandler implements Handler {
             if (!r) {
                 response.status = HttpStatus.NOT_FOUND_404
                 def os = response.outputStream
-                IOUtils.write(HttpStatus.Code.NOT_FOUND.message.getBytes(Resp.encoding), os)
+                os.write(HttpStatus.Code.NOT_FOUND.message.getBytes(Resp.encoding))
                 os.close()
             }
         } catch (HaltEx haltEx) {
             response.status = haltEx.status
             def os = response.outputStream
-            IOUtils.write(haltEx.message.getBytes(Resp.encoding), os)
+            os.write(haltEx.message.getBytes(Resp.encoding))
             os.close()
         } catch (Throwable t) {
             if (exceptionHandler) {
@@ -49,7 +48,7 @@ class ChainHandler implements Handler {
         }
     }
 
-    private boolean handleList(HttpServletRequest request, HttpServletResponse response, List<Handler> ll,
+    private boolean handleList(HttpServletRequest request, HttpServletResponse response, List<AbstractHandler> ll,
                                boolean isReturnOnceMatched) {
         if (!ll.size()) {
             return false
@@ -69,10 +68,10 @@ class ChainHandler implements Handler {
         'chain'
     }
 
-    CopyOnWriteArrayList<Handler> list = new CopyOnWriteArrayList<>()
-    CopyOnWriteArrayList<Handler> beforeList = new CopyOnWriteArrayList<>()
-    CopyOnWriteArrayList<Handler> afterList = new CopyOnWriteArrayList<>()
-    CopyOnWriteArrayList<Handler> afterAfterList = new CopyOnWriteArrayList<>()
+    CopyOnWriteArrayList<AbstractHandler> list = new CopyOnWriteArrayList<>()
+    CopyOnWriteArrayList<AbstractHandler> beforeList = new CopyOnWriteArrayList<>()
+    CopyOnWriteArrayList<AbstractHandler> afterList = new CopyOnWriteArrayList<>()
+    CopyOnWriteArrayList<AbstractHandler> afterAfterList = new CopyOnWriteArrayList<>()
 
     void print(Closure closure) {
         closure.call('list: ' + list.collect { it.name() })
@@ -88,7 +87,7 @@ class ChainHandler implements Handler {
         this
     }
 
-    private void removeOneThatExists(Handler handler, CopyOnWriteArrayList<Handler> ll = null) {
+    private void removeOneThatExists(Handler handler, CopyOnWriteArrayList<AbstractHandler> ll = null) {
         def r = ll == null ? list : ll
         def one = r.find { it.name() == handler.name() }
         if (one) {
@@ -129,7 +128,7 @@ class ChainHandler implements Handler {
     }
 
     private synchronized ChainHandler add(String uri, HttpMethod method, AbstractHandler handler,
-                                          CopyOnWriteArrayList<Handler> ll) {
+                                          CopyOnWriteArrayList<AbstractHandler> ll) {
         handler.uri = addContextPath(uri)
         handler.method = method
         removeOneThatExists(handler, ll)
@@ -138,7 +137,7 @@ class ChainHandler implements Handler {
     }
 
     private synchronized ChainHandler addRegex(Pattern pattern, HttpMethod method, RegexMatchHandler handler,
-                                               CopyOnWriteArrayList<Handler> ll) {
+                                               CopyOnWriteArrayList<AbstractHandler> ll) {
         handler.context = context
         handler.pattern = pattern
         handler.method = method

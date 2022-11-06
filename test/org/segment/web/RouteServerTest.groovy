@@ -1,7 +1,6 @@
 package org.segment.web
 
 import com.github.kevinsawicki.http.HttpRequest
-import org.apache.commons.io.IOUtils
 import org.eclipse.jetty.http.HttpStatus
 import org.segment.web.handler.ChainHandler
 import spock.lang.Specification
@@ -13,7 +12,7 @@ class RouteServerTest extends Specification {
         handler.context('/context').exceptionHandler { req, resp, t ->
             resp.status = 500
             def os = resp.outputStream
-            IOUtils.write(t.message ?: 'error', os)
+            os.write((t.message ?: 'error').bytes)
             os.close()
         }
         handler.group('/a') {
@@ -63,6 +62,7 @@ class RouteServerTest extends Specification {
             println x
         }
         def server = RouteServer.instance
+        server.isStartMetricServer = true
         server.start()
         Thread.sleep(1000)
         expect:
@@ -75,9 +75,11 @@ class RouteServerTest extends Specification {
         HttpRequest.get('http://localhost:5000/context/a/test/halt').body() == HttpStatus.Code.INTERNAL_SERVER_ERROR.message
         HttpRequest.get('http://localhost:5000/context/a/test/exception').body() == 'xxx'
         HttpRequest.get('http://localhost:5000/context/a/regex/book1').body() == 'get book'
-        def body = HttpRequest.get('http://localhost:7000/metrics').body()
-        println body
-        body.contains('HELP')
+        if (server.isStartMetricServer) {
+            def body = HttpRequest.get('http://localhost:7000/metrics').body()
+            println body
+            body.contains('HELP')
+        }
         cleanup:
         server.stop()
     }

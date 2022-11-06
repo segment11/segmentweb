@@ -1,7 +1,6 @@
 package org.segment.web.handler
 
 import groovy.transform.CompileStatic
-import org.apache.commons.io.IOUtils
 import org.eclipse.jetty.http.HttpHeader
 import org.eclipse.jetty.http.HttpStatus
 
@@ -32,15 +31,26 @@ class Resp {
 
     static final String encoding = StandardCharsets.UTF_8.name()
 
+    static long copy(InputStream input, OutputStream output) {
+        def buffer = new byte[4 * 1024]
+        long count = 0;
+        int n
+        while (-1 != (n = input.read(buffer))) {
+            output.write(buffer, 0, n)
+            count += n
+        }
+        count
+    }
+
     void output(InputStream is) {
         assert !isEnd
 
         def os = response.outputStream
         def osTarget = isGzip ? new GZIPOutputStream(os) : os
-        int len = IOUtils.copy(is, osTarget)
+        long len = copy(is, osTarget)
         osTarget.close()
         is.close()
-        response.contentLength = len
+        response.contentLength = len.intValue()
         isEnd = true
     }
 

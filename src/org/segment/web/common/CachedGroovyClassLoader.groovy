@@ -2,7 +2,6 @@ package org.segment.web.common
 
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
-import org.apache.commons.codec.digest.DigestUtils
 import org.codehaus.groovy.control.CompilationFailedException
 import org.codehaus.groovy.control.CompilerConfiguration
 
@@ -116,7 +115,7 @@ class CachedGroovyClassLoader {
                     log.debug 'get from cached - ' + name
                 }
             } else if (scriptText != null) {
-                def key = DigestUtils.md5Hex(scriptText)
+                def key = scriptText
                 synchronized (classLoaded) {
                     r = classLoaded[key]
                 }

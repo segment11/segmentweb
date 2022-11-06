@@ -33,7 +33,7 @@ class RouteServer {
 
     RouteRefreshLoader loader
 
-    boolean isStartMetricServer = true
+    boolean isStartMetricServer = false
 
     double[] buckets = "0.5,1,7.5,10".split(',').collect { it as double } as double[]
 
@@ -64,6 +64,7 @@ class RouteServer {
             }
         }), "/*")
         if (isStartMetricServer) {
+            // path pattern match :id may too many
             def holder = new FilterHolder(new MetricsFilter('request_filter',
                     'request filter', pathComponents, buckets))
             handler.addFilter(holder, '/*', EnumSet.of(DispatcherType.REQUEST))
