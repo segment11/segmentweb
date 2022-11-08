@@ -54,8 +54,8 @@ class Resp {
         isEnd = true
     }
 
-    void end(String str = null) {
-        String s = str == null ? '' : str
+    void end(Object str = null) {
+        String s = str == null ? '' : str.toString()
         if (response.contentType == null) {
             response.contentType = 'text/html;charset=' + encoding
         }
