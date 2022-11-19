@@ -6,7 +6,8 @@ import org.codehaus.groovy.control.CompilerConfiguration
 import org.segment.web.common.CachedGroovyClassLoader
 import org.segment.web.common.NamedThreadFactory
 
-import java.util.concurrent.ScheduledThreadPoolExecutor
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
 
 @CompileStatic
 @Slf4j
@@ -19,8 +20,7 @@ class RouteRefreshLoader {
         r
     }
 
-    private ScheduledThreadPoolExecutor sh = new ScheduledThreadPoolExecutor(1,
-            new NamedThreadFactory('Route-Refresh'))
+    private ScheduledExecutorService sh
 
     private List<String> dirList = []
 
@@ -183,7 +183,7 @@ class RouteRefreshLoader {
             return
         }
 
-        sh = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory('Route-Refresh'))
+        sh = Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory('route-refresh'))
         sh.scheduleWithFixedDelay({
             try {
                 refresh()
