@@ -124,7 +124,14 @@ class Req {
         request.method
     }
 
+    static final String PROXY_URI_ATTR = 'X-uri'
+
     String uri() {
+        def val = request.getAttribute(PROXY_URI_ATTR)
+        if (val != null) {
+            return val.toString()
+        }
+
         request.requestURI
     }
 
