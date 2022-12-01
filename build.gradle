@@ -36,8 +36,13 @@ dependencies {
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
     compile group: 'org.codehaus.groovy', name: 'groovy', version: '2.4.19'
 
-    compile group: 'org.eclipse.jetty', name: 'jetty-server', version: '9.4.28.v20200408'
-    compile group: 'org.eclipse.jetty', name: 'jetty-servlet', version: '9.4.28.v20200408'
+//    compile group: 'io.undertow', name: 'undertow-core', version: '2.3.0.Final'
+//    compile group: 'io.undertow', name: 'undertow-servlet', version: '2.3.0.Final'
+
+    compile group: 'org.eclipse.jetty', name: 'jetty-server', version: '9.4.49.v20220914'
+    compile group: 'org.eclipse.jetty', name: 'jetty-servlet', version: '9.4.49.v20220914'
+
+    compile group: 'redis.clients', name: 'jedis', version: '3.3.0'
 
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.10.4'
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.10.4'

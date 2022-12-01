@@ -15,6 +15,8 @@ import org.eclipse.jetty.servlet.ServletContextHandler
 import org.eclipse.jetty.servlet.ServletHolder
 import org.eclipse.jetty.util.thread.QueuedThreadPool
 import org.segment.web.handler.ChainHandler
+import org.segment.web.session.RedisSessionDataStoreFactory
+import redis.clients.jedis.JedisPool
 
 import javax.servlet.DispatcherType
 import javax.servlet.ServletException
@@ -49,6 +51,11 @@ class RouteServer {
 
     int idleTimeout = 60 * 1000
 
+    JedisPool jedisPool
+
+    // session 1hour
+    int gracePeriodSec = 60 * 60
+
     void start(int port = 5000, String host = '0.0.0.0', int metricPort = 7000) {
         if (loader) {
             loader.start()
@@ -56,6 +63,10 @@ class RouteServer {
 
         server = serverCreator ? serverCreator.create() :
                 new Server(new QueuedThreadPool(maxThreads, minThreads, idleTimeout))
+
+        if (jedisPool) {
+            server.addBean(new RedisSessionDataStoreFactory(jedisPool, gracePeriodSec))
+        }
         def handler = new ServletContextHandler(ServletContextHandler.SESSIONS)
         handler.addServlet(new ServletHolder(new HttpServlet() {
             @Override
@@ -127,6 +138,10 @@ class RouteServer {
         if (metricServer) {
             metricServer.stop()
             log.info('metric server stopped')
+        }
+        if (jedisPool) {
+            jedisPool.close()
+            log.info('jedis pool closed')
         }
     }
 }
