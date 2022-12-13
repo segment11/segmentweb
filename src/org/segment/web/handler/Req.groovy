@@ -38,6 +38,11 @@ class Req {
         request.getHeader(name)
     }
 
+    String cookie(String name) {
+        def cookie = request.cookies.find { it.name == name }
+        cookie ? cookie.value : null
+    }
+
     Object session(String name, Object value = null) {
         if (value == null) {
             return request.session.getAttribute(name)
