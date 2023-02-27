@@ -13,6 +13,7 @@ import org.eclipse.jetty.server.handler.ResourceHandler
 import org.eclipse.jetty.servlet.FilterHolder
 import org.eclipse.jetty.servlet.ServletContextHandler
 import org.eclipse.jetty.servlet.ServletHolder
+import org.eclipse.jetty.util.ssl.SslContextFactory
 import org.eclipse.jetty.util.thread.QueuedThreadPool
 import org.segment.web.handler.ChainHandler
 import org.segment.web.session.RedisSessionDataStoreFactory
@@ -56,6 +57,8 @@ class RouteServer {
     // session 1hour
     int gracePeriodSec = 60 * 60
 
+    SslContextFactory sslContextFactory
+
     void start(int port = 5000, String host = '0.0.0.0', int metricPort = 7000) {
         if (loader) {
             loader.start()
@@ -81,7 +84,12 @@ class RouteServer {
             handler.addFilter(holder, '/*', EnumSet.of(DispatcherType.REQUEST))
         }
 
-        def connector = new ServerConnector(server)
+        ServerConnector connector
+        if (sslContextFactory) {
+            connector = new ServerConnector(server, sslContextFactory)
+        } else {
+            connector = new ServerConnector(server)
+        }
         connector.host = host
         connector.port = port
         server.addConnector(connector)
