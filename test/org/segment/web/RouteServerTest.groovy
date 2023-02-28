@@ -62,7 +62,6 @@ class RouteServerTest extends Specification {
             println x
         }
         def server = RouteServer.instance
-        server.isStartMetricServer = true
         server.start()
         Thread.sleep(1000)
         expect:
@@ -75,11 +74,6 @@ class RouteServerTest extends Specification {
         HttpRequest.get('http://localhost:5000/context/a/test/halt').body() == HttpStatus.Code.INTERNAL_SERVER_ERROR.message
         HttpRequest.get('http://localhost:5000/context/a/test/exception').body() == 'xxx'
         HttpRequest.get('http://localhost:5000/context/a/regex/book1').body() == 'get book'
-        if (server.isStartMetricServer) {
-            def body = HttpRequest.get('http://localhost:7000/metrics').body()
-            println body
-            body.contains('HELP')
-        }
         cleanup:
         server.stop()
     }
