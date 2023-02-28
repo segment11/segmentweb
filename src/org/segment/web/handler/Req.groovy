@@ -39,6 +39,9 @@ class Req {
     }
 
     String cookie(String name) {
+        if (!request.cookies) {
+            return null
+        }
         def cookie = request.cookies.find { it.name == name }
         cookie ? cookie.value : null
     }
