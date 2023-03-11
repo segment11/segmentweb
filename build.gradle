@@ -1,12 +1,13 @@
 plugins {
     id 'groovy'
-    id 'maven'
+    id 'signing'
+    id 'maven-publish'
 }
 
-group 'com.github.segment11'
-version '1.0'
+group 'io.github.segment11'
+version '1.1-SNAPSHOT'
 
-final String artifactId = 'segmentweb'
+def String artifactId = 'segmentweb'
 
 repositories {
 //    maven {
@@ -28,31 +29,86 @@ sourceSets {
     }
 }
 
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
 compileGroovy {
     groovyOptions.configurationScript = file("config.groovy")
 }
 
 dependencies {
-    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.36'
-    compile group: 'org.codehaus.groovy', name: 'groovy', version: '2.4.21'
-//    compile group: 'org.ow2.asm', name: 'asm', version: '9.4'
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.36'
+    implementation group: 'org.codehaus.groovy', name: 'groovy', version: '2.4.21'
+//    implementation group: 'org.ow2.asm', name: 'asm', version: '9.4'
 
-    compile group: 'org.eclipse.jetty', name: 'jetty-server', version: '9.4.49.v20220914'
-    compile group: 'org.eclipse.jetty', name: 'jetty-servlet', version: '9.4.49.v20220914'
+    implementation group: 'org.eclipse.jetty', name: 'jetty-server', version: '9.4.49.v20220914'
+    implementation group: 'org.eclipse.jetty', name: 'jetty-servlet', version: '9.4.49.v20220914'
 
-    compile group: 'redis.clients', name: 'jedis', version: '4.3.1'
+    implementation group: 'redis.clients', name: 'jedis', version: '4.3.1'
 
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.14.1'
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.14.1'
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.14.1'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.14.1'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.14.1'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.14.1'
 
-    compile group: 'io.prometheus', name: 'simpleclient', version: '0.15.0'
-    compile group: 'io.prometheus', name: 'simpleclient_hotspot', version: '0.15.0'
+    implementation group: 'io.prometheus', name: 'simpleclient', version: '0.15.0'
+    implementation group: 'io.prometheus', name: 'simpleclient_hotspot', version: '0.15.0'
 
-    testCompile group: 'junit', name: 'junit', version: '4.12'
-    testCompile group: 'org.spockframework', name: 'spock-core', version: '1.3-groovy-2.4'
-    testCompile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.20.0'
-    testCompile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.20.0'
-    testCompile group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.20.0'
-    testCompile group: 'com.github.kevinsawicki', name: 'http-request', version: '6.0'
+    testImplementation group: 'junit', name: 'junit', version: '4.12'
+    testImplementation group: 'org.spockframework', name: 'spock-core', version: '1.3-groovy-2.4'
+    testImplementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.20.0'
+    testImplementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.20.0'
+    testImplementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.20.0'
+    testImplementation group: 'com.github.kevinsawicki', name: 'http-request', version: '6.0'
+}
+
+def ossReleaseUrl = 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2'
+def ossSnapshotUrl = 'https://s01.oss.sonatype.org/content/repositories/snapshots'
+//ossSnapshotUrl = ossReleaseUrl
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    from sourceSets.main.allSource
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifactId = name
+            groupId = group
+            version = version
+
+            pom {
+                name = 'segmentweb'
+                description = 'A macro groovy web framework inspired by sparkjava.'
+                url = 'https://github.com/segment11/segmentweb'
+                licenses {
+                    license {
+                        name = 'The Apache Software License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'segment11'
+                        name = 'Yong Ding'
+                        email = 'dingyong87@163.com'
+                    }
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            name = 'ossrh'
+            url = version.endsWith('SNAPSHOT') ? ossSnapshotUrl : ossReleaseUrl
+            credentials {
+                username = System.getProperty('ossrh.username')
+                password = System.getProperty('ossrh.password')
+            }
+        }
+    }
+}
+
+signing {
+    sign publishing.publications.mavenJava
 }
