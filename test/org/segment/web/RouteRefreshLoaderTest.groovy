@@ -11,7 +11,7 @@ class RouteRefreshLoaderTest extends Specification {
                 replace(this.class.name.replaceAll('.', '/'), '')
         def loader = CachedGroovyClassLoader.instance
         loader.init()
-        def refreshLoader = RouteRefreshLoader.create(loader.gcl).
+        def refreshLoader = RouteRefreshLoader.create(loader.gcl).compileStatic(false).
                 addDir(rootPath + '/ext/script').addClasspath(rootPath + '/ext').addVariable('name', 'kerry')
         refreshLoader.refresh()
         expect:

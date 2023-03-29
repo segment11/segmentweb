@@ -3,6 +3,7 @@ package org.segment.web
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.codehaus.groovy.control.CompilerConfiguration
+import org.codehaus.groovy.control.customizers.ASTTransformationCustomizer
 import org.segment.web.common.CachedGroovyClassLoader
 import org.segment.web.common.NamedThreadFactory
 
@@ -32,6 +33,13 @@ class RouteRefreshLoader {
 
     private boolean isJarLoad = false
 
+    private boolean isCompileStatic = true
+
+    RouteRefreshLoader compileStatic(boolean flag) {
+        this.isCompileStatic = flag
+        this
+    }
+
     RouteRefreshLoader jarLoad(boolean flag) {
         this.isJarLoad = flag
         this
@@ -60,6 +68,10 @@ class RouteRefreshLoader {
             for (classpath in classpathList) {
                 gcl.addClasspath(classpath)
             }
+        }
+
+        if (isCompileStatic) {
+            config.addCompilationCustomizers(new ASTTransformationCustomizer(CompileStatic))
         }
 
         def b = new Binding()
