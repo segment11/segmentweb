@@ -50,7 +50,7 @@ class ChainHandler implements Handler {
 
     private boolean handleList(HttpServletRequest request, HttpServletResponse response, List<AbstractHandler> ll,
                                boolean isReturnOnceMatched) {
-        if (!ll.size()) {
+        if (!ll) {
             return false
         }
 
@@ -89,10 +89,7 @@ class ChainHandler implements Handler {
 
     private void removeOneThatExists(Handler handler, CopyOnWriteArrayList<AbstractHandler> ll = null) {
         def r = ll == null ? list : ll
-        def one = r.find { it.name() == handler.name() }
-        if (one) {
-            r.remove(one)
-        }
+        r.removeIf { it.name() == handler.name() }
     }
 
     AbstractHandler findByName(String name) {
@@ -114,17 +111,10 @@ class ChainHandler implements Handler {
     }
 
     synchronized void group(String groupPathPrefix, Closure closure) {
-        if (context) {
-            context += groupPathPrefix
-        } else {
-            context = groupPathPrefix
-        }
+        String oldContext = context
+        context = oldContext == null ? groupPathPrefix : oldContext + groupPathPrefix
         closure.call()
-        if (groupPathPrefix.length() >= context.size()) {
-            context = null
-        } else {
-            context = context[0..-(groupPathPrefix.length() + 1)]
-        }
+        context = oldContext
     }
 
     private synchronized ChainHandler add(String uri, HttpMethod method, AbstractHandler handler,
