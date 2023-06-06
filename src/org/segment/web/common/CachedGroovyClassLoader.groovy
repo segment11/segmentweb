@@ -20,14 +20,14 @@ class CachedGroovyClassLoader {
     final static String GROOVY_FILE_EXT = '.groovy'
     final static String GROOVY_FILE_ENCODING = StandardCharsets.UTF_8.name()
 
-    void init(ClassLoader parentClassLoader = null, String classpath = null) {
+    synchronized void init(ClassLoader parentClassLoader = null, String classpath = null, CompilerConfiguration config = null) {
         if (gcl != null) {
             return
         }
 
-        def config = new CompilerConfiguration()
-        config.sourceEncoding = GROOVY_FILE_ENCODING
-        gcl = new Loader(parentClassLoader ?: CachedGroovyClassLoader.class.classLoader, config)
+        def configUsed = config ?: new CompilerConfiguration()
+        configUsed.sourceEncoding = GROOVY_FILE_ENCODING
+        gcl = new Loader(parentClassLoader ?: CachedGroovyClassLoader.class.classLoader, configUsed)
         if (classpath) {
             for (path in classpath.split(':')) {
                 gcl.addClasspath(path)
