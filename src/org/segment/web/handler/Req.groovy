@@ -2,6 +2,7 @@ package org.segment.web.handler
 
 import groovy.transform.CompileStatic
 import org.eclipse.jetty.http.HttpHeader
+import org.segment.web.RouteServer
 
 import javax.servlet.MultipartConfigElement
 import javax.servlet.http.HttpServletRequest
@@ -98,7 +99,7 @@ class Req {
     }
 
     public <T> T bodyAs(Class<T> clz = HashMap) {
-        JsonReader.instance.read(bodyAsBytes(), clz)
+        RouteServer.instance.jsonTransformer.read(bodyAsBytes(), clz)
     }
 
     String param(String name) {

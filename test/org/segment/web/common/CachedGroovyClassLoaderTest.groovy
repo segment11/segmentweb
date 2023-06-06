@@ -6,7 +6,7 @@ class CachedGroovyClassLoaderTest extends Specification {
     def 'parse class'() {
         given:
         def loader = CachedGroovyClassLoader.instance
-        loader.init()
+        loader.init(null, './', null)
 
         def clz = loader.gcl.parseClass(new File('ext/Test.groovy'))
         def clz2 = loader.gcl.parseClass(new File('ext/Test.groovy'))
@@ -18,6 +18,6 @@ class CachedGroovyClassLoaderTest extends Specification {
         clz == clz2
         obj.hi() == 'hi kerry'
         loader.eval('"hi"') == 'hi'
-        loader.eval('"hi"') == 'hi'
+        loader.eval('"hi ${name}"', [name: 'kerry']) == 'hi kerry'
     }
 }

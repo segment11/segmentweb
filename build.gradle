@@ -44,8 +44,6 @@ dependencies {
     implementation group: 'org.eclipse.jetty', name: 'jetty-server', version: '9.4.49.v20220914'
     implementation group: 'org.eclipse.jetty', name: 'jetty-servlet', version: '9.4.49.v20220914'
 
-    implementation group: 'redis.clients', name: 'jedis', version: '4.3.1'
-
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.14.1'
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.14.1'
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.14.1'

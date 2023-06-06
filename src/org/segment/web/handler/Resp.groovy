@@ -3,6 +3,7 @@ package org.segment.web.handler
 import groovy.transform.CompileStatic
 import org.eclipse.jetty.http.HttpHeader
 import org.eclipse.jetty.http.HttpStatus
+import org.segment.web.RouteServer
 
 import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletResponse
@@ -68,7 +69,7 @@ class Resp {
 
     void json(Object obj) {
         response.contentType = 'application/json;charset=' + encoding
-        end(JsonWriter.instance.json(obj))
+        end(RouteServer.instance.jsonTransformer.json(obj))
     }
 
     void halt(int status = HttpStatus.INTERNAL_SERVER_ERROR_500, String message =

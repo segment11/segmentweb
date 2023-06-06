@@ -1,4 +1,4 @@
-package org.segment.web.handler
+package org.segment.web.json
 
 import groovy.transform.CompileStatic
 

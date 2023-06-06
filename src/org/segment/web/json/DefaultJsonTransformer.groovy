@@ -1,4 +1,4 @@
-package org.segment.web.handler
+package org.segment.web.json
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.ObjectMapper

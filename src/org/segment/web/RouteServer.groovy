@@ -12,8 +12,8 @@ import org.eclipse.jetty.servlet.ServletHolder
 import org.eclipse.jetty.util.ssl.SslContextFactory
 import org.eclipse.jetty.util.thread.QueuedThreadPool
 import org.segment.web.handler.ChainHandler
-import org.segment.web.session.RedisSessionDataStoreFactory
-import redis.clients.jedis.JedisPool
+import org.segment.web.json.DefaultJsonTransformer
+import org.segment.web.json.JsonTransformer
 
 import javax.servlet.ServletException
 import javax.servlet.http.HttpServlet
@@ -31,6 +31,8 @@ class RouteServer {
 
     JettyServerCreator serverCreator
 
+    JsonTransformer jsonTransformer = new DefaultJsonTransformer()
+
     String webRoot
 
     int maxThreads = 200
@@ -38,11 +40,6 @@ class RouteServer {
     int minThreads = 8
 
     int idleTimeout = 60 * 1000
-
-    JedisPool jedisPool
-
-    // session 1hour
-    int gracePeriodSec = 60 * 60
 
     SslContextFactory sslContextFactory
 
@@ -54,9 +51,6 @@ class RouteServer {
         server = serverCreator ? serverCreator.create() :
                 new Server(new QueuedThreadPool(maxThreads, minThreads, idleTimeout))
 
-        if (jedisPool) {
-            server.addBean(new RedisSessionDataStoreFactory(jedisPool, gracePeriodSec))
-        }
         def handler = new ServletContextHandler(ServletContextHandler.SESSIONS)
         handler.addServlet(new ServletHolder(new HttpServlet() {
             @Override
@@ -109,10 +103,6 @@ class RouteServer {
         if (server) {
             server.stop()
             log.info('jetty server stopped')
-        }
-        if (jedisPool) {
-            jedisPool.close()
-            log.info('jedis pool closed')
         }
     }
 }

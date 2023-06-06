@@ -18,6 +18,11 @@ abstract class AbstractHandler implements Handler {
     }
 
     @Override
+    String toString() {
+        name()
+    }
+
+    @Override
     boolean handle(HttpServletRequest request, HttpServletResponse response) {
         String uriInput = request.requestURI
         if (!isRequestMatch(request.method, uriInput, request)) {
@@ -48,7 +53,6 @@ abstract class AbstractHandler implements Handler {
         def arr = uri.split(/\//)
         def arr2 = uriInput.split(/\//)
 
-
         if (arr.length != arr2.length) {
             if (arr[-1] != '**') {
                 return false
@@ -65,6 +69,7 @@ abstract class AbstractHandler implements Handler {
                 if (s == '*' || s == '**') {
                     continue
                 }
+                // save uri path values in request attribute
                 if (s.startsWith(':')) {
                     String value = arr2[i]
                     if (request != null) {

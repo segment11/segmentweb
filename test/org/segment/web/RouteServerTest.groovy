@@ -19,9 +19,36 @@ class RouteServerTest extends Specification {
             handler.group('/b') {
                 handler.before('/c') { req, resp ->
                     println 'before c filter'
+                }.before(~/^\/c$/) { req, resp ->
+                    println 'before c pattern filter'
                 }.get('/c') { req, resp ->
+                    def rawReq = req.raw()
+                    println rawReq.requestURI
+                    println req.host()
+                    println req.userAgent()
+                    println req.contentType()
+                    println req.header('test')
+                    println req.cookie('test')
+
+                    req.session('test', 'session-value')
+                    println req.session('test')
+                    req.removeSession('test')
+
+                    req.attr('test', 'attribute-value')
+                    println req.attr('test')
+
+                    println req.contentLength()
+                    println req.body()
+
+                    println req.method()
+                    println req.uri()
+                    println req.url()
+                    println req.protocol()
+                    println req.ip()
+
                     resp.end('get c')
                 }.post('/c') { req, resp ->
+                    println req.param('test')
                     resp.end('post c')
                 }.put('/c') { req, resp ->
                     resp.end('put c')
@@ -31,6 +58,8 @@ class RouteServerTest extends Specification {
                     resp.end('options d')
                 }.after('/c') { req, resp ->
                     println 'after c filter'
+                }.after(~/^\/c$/) { req, resp ->
+                    println 'after c pattern filter'
                 }.get('/json') { req, resp ->
                     [1: 1]
                 }
@@ -42,6 +71,8 @@ class RouteServerTest extends Specification {
                     throw new RuntimeException('xxx')
                 }.afterAfter('/exception') { req, resp ->
                     println 'after exception'
+                }.afterAfter(~/^\/exception$/) { req, resp ->
+                    println 'after exception pattern'
                 }
             }
             handler.group('/regex') {
@@ -61,12 +92,15 @@ class RouteServerTest extends Specification {
         handler.print { String x ->
             println x
         }
+        println handler.findByName('GET:/context/a/b/c')
         def server = RouteServer.instance
         server.start()
         Thread.sleep(1000)
         expect:
-        HttpRequest.get('http://localhost:5000/context/a/b/c').body() == 'get c'
-        HttpRequest.post('http://localhost:5000/context/a/b/c').body() == 'post c'
+        HttpRequest.get('http://localhost:5000/context/a/b/c').
+                header('test', 'header-value').
+                header('cookie', 'test=cookie-value').body() == 'get c'
+        HttpRequest.post('http://localhost:5000/context/a/b/c').form([test: 'form-field-value']).body() == 'post c'
         HttpRequest.put('http://localhost:5000/context/a/b/c').body() == 'put c'
         HttpRequest.delete('http://localhost:5000/context/a/b/c').body() == 'delete c'
         HttpRequest.get('http://localhost:5000/context/a/b/json').body() == '{"1":1}'

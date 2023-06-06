@@ -35,6 +35,13 @@ class RouteRefreshLoader {
 
     private boolean isCompileStatic = true
 
+    private int intervalSeconds = 10
+
+    RouteRefreshLoader intervalSeconds(int seconds) {
+        this.intervalSeconds = seconds
+        this
+    }
+
     RouteRefreshLoader compileStatic(boolean flag) {
         this.isCompileStatic = flag
         this
@@ -202,7 +209,7 @@ class RouteRefreshLoader {
             } catch (Exception e) {
                 log.error('fail route refresh', e)
             }
-        }, 0, 1000 * 10, java.util.concurrent.TimeUnit.MILLISECONDS)
+        }, 0, 10, java.util.concurrent.TimeUnit.SECONDS)
         log.info 'start route refresh loader interval'
     }
 }
