@@ -7,10 +7,21 @@ import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 @CompileStatic
-abstract class AbstractHandler implements Handler {
+abstract class AbstractHandler implements Handler, Comparable<AbstractHandler> {
     String uri
 
     HttpMethod method = HttpMethod.GET
+
+    int seq = 0
+
+    @Override
+    int compareTo(AbstractHandler o) {
+        if (seq != o.seq) {
+            return seq <=> o.seq
+        }
+        // uri shorter first
+        uri.length() <=> o.uri.length()
+    }
 
     @Override
     String name() {

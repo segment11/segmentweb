@@ -6,7 +6,6 @@ import org.eclipse.jetty.http.HttpStatus
 
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
-import java.util.concurrent.CopyOnWriteArrayList
 import java.util.regex.Pattern
 
 @Singleton
@@ -68,10 +67,10 @@ class ChainHandler implements Handler {
         'chain'
     }
 
-    CopyOnWriteArrayList<AbstractHandler> list = new CopyOnWriteArrayList<>()
-    CopyOnWriteArrayList<AbstractHandler> beforeList = new CopyOnWriteArrayList<>()
-    CopyOnWriteArrayList<AbstractHandler> afterList = new CopyOnWriteArrayList<>()
-    CopyOnWriteArrayList<AbstractHandler> afterAfterList = new CopyOnWriteArrayList<>()
+    ArrayList<AbstractHandler> list = new ArrayList<>()
+    ArrayList<AbstractHandler> beforeList = new ArrayList<>()
+    ArrayList<AbstractHandler> afterList = new ArrayList<>()
+    ArrayList<AbstractHandler> afterAfterList = new ArrayList<>()
 
     void print(Closure closure) {
         closure.call('list: ' + list.collect { it.name() })
@@ -87,7 +86,7 @@ class ChainHandler implements Handler {
         this
     }
 
-    private void removeOneThatExists(Handler handler, CopyOnWriteArrayList<AbstractHandler> ll = null) {
+    private void removeOneThatExists(Handler handler, ArrayList<AbstractHandler> ll = null) {
         def r = ll == null ? list : ll
         r.removeIf { it.name() == handler.name() }
     }
@@ -118,21 +117,24 @@ class ChainHandler implements Handler {
     }
 
     private synchronized ChainHandler add(String uri, HttpMethod method, AbstractHandler handler,
-                                          CopyOnWriteArrayList<AbstractHandler> ll) {
+                                          ArrayList<AbstractHandler> ll) {
         handler.uri = addContextPath(uri)
         handler.method = method
         removeOneThatExists(handler, ll)
         ll << handler
+        ll.sort()
         this
     }
 
     private synchronized ChainHandler addRegex(Pattern pattern, HttpMethod method, RegexMatchHandler handler,
-                                               CopyOnWriteArrayList<AbstractHandler> ll) {
+                                               ArrayList<AbstractHandler> ll) {
         handler.context = context
         handler.pattern = pattern
         handler.method = method
+        handler.uri = addContextPath(pattern.toString())
         removeOneThatExists(handler, ll)
         ll << handler
+        ll.sort()
         this
     }
 
@@ -176,27 +178,33 @@ class ChainHandler implements Handler {
         addRegex(pattern, HttpMethod.OPTIONS, handler, list)
     }
 
-    ChainHandler before(String uri, AbstractHandler handler) {
+    ChainHandler before(String uri, AbstractHandler handler, int seq = 0) {
+        handler.seq = seq
         add(uri, HttpMethod.OPTIONS, handler, beforeList)
     }
 
-    ChainHandler before(Pattern pattern, RegexMatchHandler handler) {
+    ChainHandler before(Pattern pattern, RegexMatchHandler handler, int seq = 0) {
+        handler.seq = seq
         addRegex(pattern, HttpMethod.OPTIONS, handler, beforeList)
     }
 
-    ChainHandler after(String uri, AbstractHandler handler) {
+    ChainHandler after(String uri, AbstractHandler handler, int seq = 0) {
+        handler.seq = seq
         add(uri, HttpMethod.OPTIONS, handler, afterList)
     }
 
-    ChainHandler after(Pattern pattern, RegexMatchHandler handler) {
+    ChainHandler after(Pattern pattern, RegexMatchHandler handler, int seq = 0) {
+        handler.seq = seq
         addRegex(pattern, HttpMethod.OPTIONS, handler, afterList)
     }
 
-    ChainHandler afterAfter(String uri, AbstractHandler handler) {
+    ChainHandler afterAfter(String uri, AbstractHandler handler, int seq = 0) {
+        handler.seq = seq
         add(uri, HttpMethod.OPTIONS, handler, afterAfterList)
     }
 
-    ChainHandler afterAfter(Pattern pattern, RegexMatchHandler handler) {
+    ChainHandler afterAfter(Pattern pattern, RegexMatchHandler handler, int seq = 0) {
+        handler.seq = seq
         addRegex(pattern, HttpMethod.OPTIONS, handler, afterAfterList)
     }
 }
