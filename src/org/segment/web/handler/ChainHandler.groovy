@@ -13,9 +13,10 @@ import java.util.regex.Pattern
 class ChainHandler implements Handler {
     @Override
     boolean handle(HttpServletRequest request, HttpServletResponse response) {
+        boolean r = false
         try {
             handleList(request, response, beforeList, false)
-            def r = handleList(request, response, list, true)
+            r = handleList(request, response, list, true)
             handleList(request, response, afterList, false)
             if (!r) {
                 response.status = HttpStatus.NOT_FOUND_404
@@ -45,10 +46,12 @@ class ChainHandler implements Handler {
                 log.error('after after handle error', e)
             }
         }
+
+        return r
     }
 
-    private boolean handleList(HttpServletRequest request, HttpServletResponse response, List<AbstractHandler> ll,
-                               boolean isReturnOnceMatched) {
+    private static boolean handleList(HttpServletRequest request, HttpServletResponse response, List<AbstractHandler> ll,
+                                      boolean isReturnOnceMatched) {
         if (!ll) {
             return false
         }

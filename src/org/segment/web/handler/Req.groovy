@@ -98,7 +98,7 @@ class Req {
         body
     }
 
-    public <T> T bodyAs(Class<T> clz = HashMap) {
+    <T> T bodyAs(Class<T> clz = HashMap) {
         RouteServer.instance.jsonTransformer.read(bodyAsBytes(), clz)
     }
 

@@ -20,8 +20,7 @@ class NamedThreadFactory implements ThreadFactory {
     }
 
     NamedThreadFactory(String namePrefix) {
-        def s = System.getSecurityManager()
-        group = (s != null) ? s.threadGroup : Thread.currentThread().threadGroup
+        group = Thread.currentThread().threadGroup
         this.namePrefix = namePrefix + '-' + poolNumber.getAndIncrement() + '-thread-'
     }
 

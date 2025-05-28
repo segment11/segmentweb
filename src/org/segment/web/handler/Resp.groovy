@@ -34,7 +34,7 @@ class Resp {
 
     static long copy(InputStream input, OutputStream output) {
         def buffer = new byte[4 * 1024]
-        long count = 0;
+        long count = 0
         int n
         while (-1 != (n = input.read(buffer))) {
             output.write(buffer, 0, n)
@@ -72,7 +72,7 @@ class Resp {
         end(RouteServer.instance.jsonTransformer.json(obj))
     }
 
-    void halt(int status = HttpStatus.INTERNAL_SERVER_ERROR_500, String message =
+    static void halt(int status = HttpStatus.INTERNAL_SERVER_ERROR_500, String message =
             HttpStatus.Code.INTERNAL_SERVER_ERROR.message, Throwable t = null) {
         throw t == null ? new HaltEx(status, message) : new HaltEx(status, message, t)
     }

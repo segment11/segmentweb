@@ -6,5 +6,5 @@ import groovy.transform.CompileStatic
 interface JsonTransformer {
     String json(Object obj)
 
-    public <T> T read(byte[] bytes, Class<T> clz)
+    <T> T read(byte[] bytes, Class<T> clz)
 }

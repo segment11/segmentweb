@@ -12,7 +12,7 @@ class CachedGroovyClassLoaderTest extends Specification {
         def clz2 = loader.gcl.parseClass(new File('ext/Test.groovy'))
         println clz
         println clz2
-        def obj = clz.newInstance()
+        def obj = clz.getDeclaredConstructor().newInstance()
 
         expect:
         clz == clz2

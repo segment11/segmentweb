@@ -9,6 +9,7 @@ import org.segment.web.common.NamedThreadFactory
 
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.TimeUnit
 
 @CompileStatic
 @Slf4j
@@ -94,11 +95,8 @@ class RouteRefreshLoader {
             if ('jar' == url.protocol) {
                 def jarFile = ((JarURLConnection) url.openConnection()).jarFile
                 for (entry in jarFile.entries()) {
-                    if (entry.isDirectory()) {
-                        continue
-                    } else {
-                        String name = entry.name
-                        runGroovyScriptInJar(name, packageNameDir)
+                    if (!entry.isDirectory()) {
+                        runGroovyScriptInJar(entry.name, packageNameDir)
                     }
                 }
             }
@@ -112,7 +110,7 @@ class RouteRefreshLoader {
 
         if (name.startsWith(packageNameDir) && name.endsWith('.class') && !name.contains('$') && !name.contains('_')) {
             String className = name[0..-7].replaceAll(/\//, '.')
-            def one = Class.forName(className).newInstance()
+            def one = Class.forName(className).getDeclaredConstructor().newInstance()
             if (one instanceof Script) {
                 Script gs = one as Script
                 def b = new Binding()
@@ -209,7 +207,7 @@ class RouteRefreshLoader {
             } catch (Exception e) {
                 log.error('fail route refresh', e)
             }
-        }, 0, 10, java.util.concurrent.TimeUnit.SECONDS)
+        }, 0, 10, TimeUnit.SECONDS)
         log.info 'start route refresh loader interval'
     }
 }

@@ -36,7 +36,7 @@ class CachedGroovyClassLoader {
     }
 
     Object eval(String scriptText, Map<String, Object> variables = null) {
-        Script script = gcl.parseClass(scriptText).newInstance()
+        Script script = (Script) gcl.parseClass(scriptText).getDeclaredConstructor().newInstance()
         if (variables != null) {
             def b = new Binding()
             variables.each { k, v ->
@@ -54,15 +54,15 @@ class CachedGroovyClassLoader {
             super(loader, config)
         }
 
-        private Map<String, Long> lastModified = [:]
-        private Map<String, Class> classLoaded = [:]
+        private final Map<String, Long> lastModified = [:]
+        private final Map<String, Class> classLoaded = [:]
 
         private boolean isModified(File f) {
             def l = lastModified[f.absolutePath]
             l != null && l.longValue() != f.lastModified()
         }
 
-        private void logClassLoaded(Map<String, Class> x) {
+        private static void logClassLoaded(Map<String, Class> x) {
             for (entry in x.entrySet()) {
                 log.debug(entry.key + ':' + entry.value)
             }
