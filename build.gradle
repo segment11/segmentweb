@@ -1,7 +1,5 @@
 plugins {
     id 'groovy'
-    id 'signing'
-    id 'maven-publish'
 }
 
 group 'io.github.segment11'
@@ -59,56 +57,4 @@ dependencies {
 
 test {
     useJUnitPlatform()
-}
-
-def ossReleaseUrl = 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2'
-def ossSnapshotUrl = 'https://s01.oss.sonatype.org/content/repositories/snapshots'
-//ossSnapshotUrl = ossReleaseUrl
-
-task sourcesJar(type: Jar, dependsOn: classes) {
-    from sourceSets.main.allSource
-}
-
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-            artifactId = name
-            groupId = group
-            version = version
-
-            pom {
-                name = 'segmentweb'
-                description = 'A macro groovy web framework inspired by sparkjava.'
-                url = 'https://github.com/segment11/segmentweb'
-                licenses {
-                    license {
-                        name = 'The Apache Software License, Version 2.0'
-                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                    }
-                }
-                developers {
-                    developer {
-                        id = 'segment11'
-                        name = 'Yong Ding'
-                        email = 'dingyong87@163.com'
-                    }
-                }
-            }
-        }
-    }
-    repositories {
-        maven {
-            name = 'ossrh'
-            url = version.toString().endsWith('SNAPSHOT') ? ossSnapshotUrl : ossReleaseUrl
-            credentials {
-                username = System.getProperty('ossrh.username')
-                password = System.getProperty('ossrh.password')
-            }
-        }
-    }
-}
-
-signing {
-    sign publishing.publications.mavenJava
 }
