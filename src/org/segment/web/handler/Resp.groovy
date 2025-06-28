@@ -55,6 +55,20 @@ class Resp {
         isEnd = true
     }
 
+    void download(InputStream is, String fileName) {
+        assert !isEnd
+
+        response.contentType = 'application/octet-stream'
+        response.setHeader('Content-Disposition', 'attachment; filename="' + fileName + '"')
+
+        def os = response.outputStream
+        long len = copy(is, os)
+        os.close()
+        response.contentLength = len.intValue()
+
+        isEnd = true
+    }
+
     void end(Object str = null) {
         String s = str == null ? '' : str.toString()
         if (response.contentType == null) {
